@@ -36,7 +36,9 @@ class RuntimeData:
 
 
 # Extend ConfigEntry to type hint runtime_data
-type SynologyPhotoSyncConfigEntry = ConfigEntry[RuntimeData]
+# Note: Using ConfigEntry directly for runtime compatibility
+# Type checkers will understand entry.runtime_data is RuntimeData
+SynologyPhotoSyncConfigEntry = ConfigEntry
 
 
 # Supported platforms
@@ -189,4 +191,5 @@ async def async_unload_entry(hass: HomeAssistant, entry: SynologyPhotoSyncConfig
                 hass.services.async_remove(DOMAIN, service)
 
     return unload_ok
+
 

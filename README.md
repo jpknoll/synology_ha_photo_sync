@@ -136,6 +136,38 @@ This integration uses:
 - `aiohttp` for HTTP requests
 - Synology DSM FileStation API for listing and downloading files
 
+### Running Tests
+
+To run the test suite:
+
+```bash
+pip install -r requirements.test.txt
+pytest
+```
+
+**Note:** If you encounter Python 3.13 compatibility issues with pip (expat library errors), see [TESTING.md](TESTING.md) for solutions. Options include:
+
+1. **Docker** (if available): `./docker-test.sh`
+2. **Python 3.11/3.12 from AUR**: `yay -S python311`
+3. **CI/CD**: Push to GitHub and let GitHub Actions run tests
+
+The CI/CD pipeline uses Python 3.11 and 3.12 which work without issues.
+
+### Pre-commit Hooks
+
+This project uses pre-commit hooks to ensure code quality. Install and set up:
+
+```bash
+pip install pre-commit
+pre-commit install
+```
+
+### Continuous Integration
+
+The project includes GitHub Actions workflows for:
+- **hassfest**: Validates the integration configuration
+- **Python package**: Runs the test suite on Python 3.11 and 3.12
+
 ## License
 
 See LICENSE file for details.

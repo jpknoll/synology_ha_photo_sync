@@ -128,3 +128,4 @@ class SynologyFilesDownloadedSensor(SynologyBaseSensor):
                     total += source_data.get("files_downloaded", 0)
             self._attr_native_value = total
 
+

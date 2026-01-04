@@ -6,9 +6,15 @@ import logging
 import voluptuous as vol
 
 from homeassistant import config_entries
-from homeassistant.config_entries import ConfigFlowResult
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import HomeAssistantError
+
+# ConfigFlowResult is available in newer Home Assistant versions
+try:
+    from homeassistant.config_entries import ConfigFlowResult
+except ImportError:
+    # Fallback for older versions
+    ConfigFlowResult = dict
 
 from .const import DOMAIN, CONF_SOURCES, CONF_URL, CONF_FOLDER_NAME, DEFAULT_NAME
 
