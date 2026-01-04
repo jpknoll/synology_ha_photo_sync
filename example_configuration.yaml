@@ -1,0 +1,35 @@
+# Example configuration for Synology Photo Sync
+# This is for reference only - configuration is done through the UI
+
+# Example sources JSON format (used during setup):
+# [
+#   {
+#     "url": "https://jpknoll-nas.quickconnect.to/mo/sharing/dRCQK2EDv",
+#     "folder_name": "family_photos"
+#   },
+#   {
+#     "url": "https://jpknoll-nas.quickconnect.to/mo/sharing/xyz789",
+#     "folder_name": "vacation_photos"
+#   }
+# ]
+
+# Example automation to sync daily:
+# automation:
+#   - alias: "Sync Photos Daily"
+#     trigger:
+#       - platform: time
+#         at: "02:00:00"
+#     action:
+#       - service: synology_photo_sync.sync_all
+
+# Example automation to sync a specific source:
+# automation:
+#   - alias: "Sync Family Photos"
+#     trigger:
+#       - platform: time
+#         at: "03:00:00"
+#     action:
+#       - service: synology_photo_sync.sync_source
+#         data:
+#           source_name: family_photos
+
