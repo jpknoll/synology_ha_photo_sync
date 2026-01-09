@@ -1,174 +1,65 @@
-# Synology Photo Sync Home Assistant Integration
+# Synology Photo Album Home Assistant Integration
 
-A Home Assistant custom integration that syncs/downloads images from Synology QuickConnect sharing links into organized folders.
+This custom Home Assistant integration creates a media source from images in a Synology Photos shared album. It scrapes the sharing page to extract image URLs and makes them available in Home Assistant's media browser.
 
 ## Features
 
-- **Multiple Sources**: Configure multiple Synology sharing URLs, each syncing to its own subfolder
-- **Automatic Organization**: Images are organized by source in separate folders
-- **Service-Based Sync**: Trigger sync operations via Home Assistant services
-- **Status Monitoring**: Sensors to track sync status, last sync time, and files downloaded
-- **Duplicate Prevention**: Skips files that already exist locally
+- Scrapes Synology Photos sharing pages to extract image URLs
+- Creates a media source in Home Assistant's media browser
+- Supports browsing and playing images from shared albums
+- Configurable via Home Assistant's UI
 
 ## Installation
 
-1. Copy the `synology_photo_sync` folder to your Home Assistant `custom_components` directory:
+1. Copy the `custom_components/synology_photo_album` directory to your Home Assistant `custom_components` folder:
    ```
-   <config>/custom_components/synology_photo_sync/
+   <config>/custom_components/synology_photo_album/
    ```
 
 2. Restart Home Assistant
 
-3. Go to **Settings** > **Devices & Services** > **Add Integration**
+3. Go to **Settings** → **Devices & Services** → **Add Integration**
 
-4. Search for "Synology Photo Sync" and follow the setup wizard
+4. Search for "Synology Photo Album" and follow the setup wizard
+
+5. Enter your Synology Photos sharing URL (e.g., `https://your-nas.quickconnect.to/mo/sharing/XXXXX`)
 
 ## Configuration
 
-### Initial Setup
-
-During setup, you'll be asked to provide:
-- **Integration Name**: A friendly name for the integration
-- **Sources**: A JSON array of sources, each with:
-  - `url`: The Synology QuickConnect sharing URL (e.g., `https://your-nas.quickconnect.to/mo/sharing/abc123`)
-  - `folder_name`: The name of the subfolder where images will be stored
-
-Example sources JSON:
-```json
-[
-  {
-    "url": "https://jpknoll-nas.quickconnect.to/mo/sharing/dRCQK2EDv",
-    "folder_name": "family_photos"
-  },
-  {
-    "url": "https://jpknoll-nas.quickconnect.to/mo/sharing/xyz789",
-    "folder_name": "vacation_photos"
-  }
-]
-```
-
-### Data Storage
-
-Images are stored in:
-```
-<config>/synology_photo_sync/<folder_name>/
-```
-
-Where `<config>` is your Home Assistant configuration directory.
-
-## Usage
-
-### Services
-
-#### `synology_photo_sync.sync_all`
-Sync all configured sources.
-
-**Service Data:**
-- None required
-
-**Example:**
-```yaml
-service: synology_photo_sync.sync_all
-```
-
-#### `synology_photo_sync.sync_source`
-Sync a specific source by folder name.
-
-**Service Data:**
-- `source_name` (required): The folder name of the source to sync
-
-**Example:**
-```yaml
-service: synology_photo_sync.sync_source
-data:
-  source_name: family_photos
-```
-
-### Sensors
-
-The integration provides the following sensors:
-
-- **Sync Status**: Current sync status (`idle`, `running`, `completed`, `error`)
-- **Last Sync**: Timestamp of the last sync operation
-- **Files Downloaded**: Total number of files downloaded across all sources
-
-### Automation Example
-
-```yaml
-automation:
-  - alias: "Sync Photos Daily"
-    trigger:
-      - platform: time
-        at: "02:00:00"
-    action:
-      - service: synology_photo_sync.sync_all
-```
+The integration requires:
+- **Sharing URL**: The full URL to your Synology Photos shared album
+- **Update Interval** (optional): How often to refresh the photo list (default: 3600 seconds / 1 hour)
 
 ## How It Works
 
-This integration uses the official Synology DSM FileStation API to:
-1. List files in the sharing link using `SYNO.FileStation.List`
-2. Download image files using `SYNO.FileStation.Download`
+The integration:
+1. Extracts the passphrase from the sharing URL
+2. Makes API calls to the Synology Photos sharing endpoints (same as the web page does)
+3. Retrieves all photos from the shared album
+4. Makes them available as a media source in Home Assistant
 
-The integration automatically extracts the sharing ID from the QuickConnect URL and constructs the appropriate API endpoints.
+## Usage
 
-## Limitations
+Once configured, you can:
+- Browse photos in the Media Browser (Media → Browse Media → Synology Photo Album)
+- Use the media source in automations or scripts
+- Display photos on dashboards using media players that support images
 
-- Only image files are downloaded (JPEG, PNG, GIF, BMP, WEBP, HEIC, HEIF)
-- Currently only syncs files from the root of the sharing link (subdirectories are skipped)
-- Sharing links must be publicly accessible or the integration must have appropriate permissions
+## Technical Details
 
-## Troubleshooting
+The scraper uses the same API endpoints that the Synology Photos web interface uses:
+- `SYNO.Foto.Browse.Album` - Gets album information
+- `SYNO.Foto.Browse.Item` - Gets photo items from the album
+- `/synofoto/api/v2/p/Thumbnail/get` - Gets thumbnail/full image URLs
 
-1. **No files downloaded**: 
-   - Check that the sharing link is publicly accessible
-   - Verify the URL format is correct
-   - Check Home Assistant logs for errors
+This approach scrapes the API endpoints rather than parsing HTML, making it more reliable and efficient.
 
-2. **Sync fails**:
-   - Ensure the sharing link is accessible from your Home Assistant instance
-   - Check network connectivity
-   - Review logs for specific error messages
+## Requirements
 
-## Development
-
-This integration uses:
-- `aiohttp` for HTTP requests
-- Synology DSM FileStation API for listing and downloading files
-
-### Running Tests
-
-To run the test suite:
-
-```bash
-pip install -r requirements.test.txt
-pytest
-```
-
-**Note:** If you encounter Python 3.13 compatibility issues with pip (expat library errors), see [TESTING.md](TESTING.md) for solutions. Options include:
-
-1. **Docker** (if available): `./docker-test.sh`
-2. **Python 3.11/3.12 from AUR**: `yay -S python311`
-3. **CI/CD**: Push to GitHub and let GitHub Actions run tests
-
-The CI/CD pipeline uses Python 3.11 and 3.12 which work without issues.
-
-### Pre-commit Hooks
-
-This project uses pre-commit hooks to ensure code quality. Install and set up:
-
-```bash
-pip install pre-commit
-pre-commit install
-```
-
-### Continuous Integration
-
-The project includes GitHub Actions workflows for:
-- **hassfest**: Validates the integration configuration
-- **Python package**: Runs the test suite on Python 3.11 and 3.12
+- Home Assistant 2023.1 or later
+- Python packages: `aiohttp`, `beautifulsoup4`, `lxml` (installed automatically)
 
 ## License
 
-See LICENSE file for details.
+This integration is provided as-is for personal use.
 
