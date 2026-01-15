@@ -1,0 +1,18 @@
+{
+    "config": {
+        "step": {
+            "user": {
+                "title": "Connect to Photo Album Share",
+                "description": "Set up your Synology Photo Album Share integration.",
+                "data": {
+                    "sharing_url": "Sharing URL",
+                    "update_interval": "Update Interval (seconds)"
+                }
+            }
+        },
+        "error": {
+            "invalid_url": "Invalid URL format",
+            "cannot_connect": "Failed to connect to the sharing URL"
+        }
+    }
+}
